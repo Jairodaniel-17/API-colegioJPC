@@ -702,21 +702,6 @@ def delete_tarea(idtarea: int):
 directorio_pdf = "pdf"
 
 
-@app.get("/pdf/{nombre_archivo}")
-def get_pdf(nombre_archivo: str):
-    # Ruta completa del archivo
-    ruta_archivo = Path(directorio_pdf) / nombre_archivo
-
-    # Verificar si el archivo existe
-    if ruta_archivo.exists():
-        # Retornar el archivo como respuesta
-        return FileResponse(
-            ruta_archivo, media_type="application/pdf", filename=nombre_archivo
-        )
-    else:
-        return {"mensaje": "Archivo no encontrado"}
-
-
 # get
 @app.get("/entregas")
 def get_entregas():
