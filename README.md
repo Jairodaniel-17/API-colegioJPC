@@ -64,7 +64,7 @@ Este proyecto es un sistema de gestión académica que permite a usuarios, como 
 - **fecha_cambio**: Fecha en que se realizó el cambio de estado.
 
 ## Requisitos del Sistema
-- Python (versión X.X.X)
+- Python (versión 3.9)
 - FastAPI
 - Otras bibliotecas y dependencias (listar si es necesario)
 - React Native
