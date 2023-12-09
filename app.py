@@ -22,51 +22,6 @@ app.add_middleware(
 )
 
 
-# class DatabaseConnection:
-#     """
-#     Clase para gestionar las conexiones a la base de datos con un pool.
-#     """
-
-#     _instance = None
-#     _lock = threading.Lock()
-#     _connection_pool = Queue(maxsize=5)
-
-#     def __new__(cls):
-#         """
-#         Crea una nueva instancia de la clase si no existe.
-#         """
-#         with cls._lock:
-#             if cls._instance is None:
-#                 cls._instance = super().__new__(cls)
-#                 cls._instance.conn = cls._instance._create_connection()
-#         return cls._instance
-
-#     def _create_connection(self):
-#         """
-#         Crea una conexión a la base de datos.
-#         """
-#         if not self._connection_pool.empty():
-#             return self._connection_pool.get()
-#         else:
-#             connection = sqlite3.connect("colegio.db")
-#             connection.row_factory = sqlite3.Row
-#             return connection
-
-#     def get_connection(self):
-#         """
-#         Obtener el objeto de conexión de la base de datos.
-#         """
-#         return self._instance._create_connection()
-
-#     def release_connection(self):
-#         """
-#         Liberar la conexión de nuevo al pool.
-#         """
-#         if self._instance is not None:
-#             self._connection_pool.put(self._instance.conn)
-#             self._instance.conn = None  # Marcar la instancia como sin conexión
-
-
 class DatabaseConnection:
     _instance = None
     _lock = threading.Lock()
@@ -99,6 +54,12 @@ class DatabaseConnection:
         if self._instance is not None:
             self._connection_pool.put(self._instance.conn)
             self._instance.conn = None
+
+
+# saludo
+@app.get("/")
+def read_root():
+    return {"mensaje": "Bienvenido a la API del colegio JPC 2023"}
 
 
 """
@@ -859,124 +820,6 @@ def post_entrega(idtarea: int, idestudiante: int, archivo: UploadFile = File(...
         return {"mensaje": "Error al procesar la entrega"}
 
 
-# @app.post("/entregas")
-# def post_entrega(idtarea: int, idestudiante: int, archivo: UploadFile = File(...)):
-#     """
-#     Crear una nueva entrega.
-#     """
-#     try:
-#         with DatabaseConnection() as conn:
-#             cursor = conn.cursor()
-
-#             # Establecer la fecha de entrega como la fecha actual
-#             fecha_entrega = datetime.now().strftime("%Y-%m-%d")
-
-#             # Obtener el tipo de archivo real del objeto UploadFile
-#             tipo_archivo = archivo.content_type
-
-#             # Insertar la entrega en la base de datos
-#             cursor.execute(
-#                 "INSERT INTO Entregas (fecha_entrega, tipo_archivo, idtarea, idestudiante) VALUES (?, ?, ?, ?)",
-#                 (
-#                     fecha_entrega,
-#                     tipo_archivo,
-#                     idtarea,
-#                     idestudiante,
-#                 ),
-#             )
-
-#             # Obtener el ID de la última fila insertada
-#             id_entrega = cursor.lastrowid
-
-#             # Crear el directorio si no existe
-#             directorio_archivos = "pdf"
-#             Path(directorio_archivos).mkdir(parents=True, exist_ok=True)
-
-#             # Obtener el timestamp actual
-#             timestamp_actual = datetime.now().strftime("%Y%m%d%H%M%S")
-
-#             # Modificar el nombre del archivo para evitar conflictos
-#             nombre_archivo = f"{archivo.filename.split('.')[0]}_{timestamp_actual}_{idestudiante}.{archivo.filename.split('.')[1]}"
-
-#             # Guardar el archivo en el sistema de archivos
-#             ruta_archivo = Path(directorio_archivos) / nombre_archivo
-#             with ruta_archivo.open("wb") as file:
-#                 file.write(archivo.file.read())
-
-#             # Actualizar el nombre del archivo en la base de datos
-#             cursor.execute(
-#                 "UPDATE Entregas SET nombre_archivo = ? WHERE identrega = ?",
-#                 (nombre_archivo, id_entrega),
-#             )
-
-#             conn.commit()
-
-#             return {"mensaje": "Entrega creada exitosamente"}
-#     except Exception as e:
-#         print(e)
-#         return {"mensaje": "Error al procesar la entrega"}
-
-
-# # put
-# @app.put("/entregas/{identrega}")
-# def put_entrega(
-#     identrega: int, idtarea: int, idestudiante: int, archivo: UploadFile = File(...)
-# ):
-#     """
-#     Actualizar una entrega.
-#     """
-#     try:
-#         with DatabaseConnection() as conn:
-#             cursor = conn.cursor()
-
-#             # Establecer la fecha de entrega como la fecha actual
-#             fecha_entrega = datetime.now().strftime("%Y-%m-%d")
-
-#             # Obtener el tipo de archivo real del objeto UploadFile
-#             tipo_archivo = archivo.content_type
-
-#             # Actualizar la entrega en la base de datos
-#             cursor.execute(
-#                 "UPDATE Entregas SET fecha_entrega = ?, tipo_archivo = ?, idtarea = ?, idestudiante = ? WHERE identrega = ?",
-#                 (
-#                     fecha_entrega,
-#                     tipo_archivo,
-#                     idtarea,
-#                     idestudiante,
-#                     identrega,
-#                 ),
-#             )
-
-#             # Crear el directorio si no existe
-#             directorio_archivos = "pdf"
-#             Path(directorio_archivos).mkdir(parents=True, exist_ok=True)
-
-#             # Obtener el timestamp actual
-#             timestamp_actual = datetime.now().strftime("%Y%m%d%H%M%S")
-
-#             # Modificar el nombre del archivo para evitar conflictos
-#             nombre_archivo = f"{archivo.filename.split('.')[0]}_{timestamp_actual}_{idestudiante}.{archivo.filename.split('.')[1]}"
-
-#             # Guardar el archivo en el sistema de archivos
-#             ruta_archivo = Path(directorio_archivos) / nombre_archivo
-#             with ruta_archivo.open("wb") as file:
-#                 file.write(archivo.file.read())
-
-#             # Actualizar el nombre del archivo en la base de datos
-#             cursor.execute(
-#                 "UPDATE Entregas SET nombre_archivo = ? WHERE identrega = ?",
-#                 (nombre_archivo, identrega),
-#             )
-
-#             conn.commit()
-
-#             return {"mensaje": "Entrega actualizada exitosamente"}
-#     except Exception as e:
-#         print(e)
-#         raise HTTPException(status_code=500, detail="Error al procesar la entrega")
-
-
-# put
 # put
 @app.put("/entregas/{identrega}")
 def put_entrega(identrega: int, archivo: UploadFile = File(...)):
